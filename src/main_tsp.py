@@ -21,7 +21,7 @@ if __name__ == '__main__':
             prob = Problem.from_textio(f)
         #prob = tsp.Problem.from_textio(sys.stdin)
     else:
-        raise Exception()
+        #prob = Problem.from_textio("data/sample.txt")
     if (prob):
         sol1 = solvers.greedy_construction_random_tie_breaking(Solution.empty_solution(prob))
         print("Greedy construction with random tie breaking: {:.2f}".format(sol1.objective_value()))

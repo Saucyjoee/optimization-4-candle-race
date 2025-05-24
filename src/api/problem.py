@@ -27,6 +27,7 @@ class Problem:
         """
         Create a problem from a text I/O source `f`
         """
+        print(f)
         n = int(f.readline())
         initPos = list(map(int, f.readline().split()))
         towns = []
