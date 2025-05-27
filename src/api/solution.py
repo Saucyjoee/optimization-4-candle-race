@@ -36,11 +36,11 @@ class Solution:
 
     @classmethod
     def empty_solution(cls, problem):
-        return cls(problem, [], set(range(problem.n)))
+        return cls(problem, [0], set(range(1,problem.n)))
 
     @classmethod
     def random_solution(cls, problem):
-        c = list(range(problem.n))
+        c = (list(range(1,problem.n)))
         random.shuffle(c)
         time = 0
         pos = problem.initPos
@@ -51,7 +51,7 @@ class Solution:
             pos = problem[town][:3]
             value += max(0, problem[town][2] - (DT*problem[town][3]))
 
-        return cls(problem, c, set(), value, time)
+        return cls(problem, [0].append(c), set(), value, time)
 
     def problem_instance(self):
         return self.problem
@@ -62,14 +62,12 @@ class Solution:
     def objective_value(self):
         self.time = 0
         self.value = 0
-        pos = self.problem.initPos
+        prev_town = self.sequence[0]
         for town in self.sequence:
-            #print(town)
-            #print(self.problem.towns)
-            DT = (pos[0] - self.problem.towns[town][0]) + (pos[1] - self.problem.towns[town][1])
+            DT = abs(self.problem.towns[prev_town][1] - self.problem.towns[town][1]) + abs(self.problem.towns[prev_town][2] - self.problem.towns[town][2])
             self.time += DT
-            pos = self.problem.towns[town][:3]
-            self.value += max(0, self.problem.towns[town][2] - (DT*self.problem.towns[town][3]))
+            self.value += max(0, self.problem.towns[town][3] - (self.time*self.problem.towns[town][4]))
+            prev_town = town
         return self.value
 
     def lower_bound(self):

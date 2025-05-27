@@ -24,16 +24,10 @@ if __name__ == '__main__':
         #prob = Problem.from_textio("data/sample.txt")
         pass
     if (prob):
-        sol1 = solvers.greedy_construction_random_tie_breaking(Solution.empty_solution(prob))
-        print("Greedy construction with random tie breaking: {:.2f}".format(sol1.objective_value()))
-        empty = Solution.empty_solution(prob)
-        moves = Solution.empty_solution(prob).construction_neighbourhood().moves(empty)
-        for x in moves:
-            print("my move", x)
-            x.apply(empty)
-            break
-        for x in empty.construction_neighbourhood().moves(empty):
-            print(x)
+        sol2 = solvers.Search(Solution.empty_solution(prob))
+        print("Heuristics search with pruning: {:.2f}".format(sol2.objective_value()))
+        print(sol2)
+        print(Solution(prob, [0,1,3,2,4],[]).objective_value())
 
 
 

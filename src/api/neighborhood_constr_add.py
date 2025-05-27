@@ -42,4 +42,4 @@ class AddMove(Move):
         solution.not_scheduled.remove(self.town)
 
     def lower_bound_increment(self, solution):
-        return 0
+        return solution.objective_value()

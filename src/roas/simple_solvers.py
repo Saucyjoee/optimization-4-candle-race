@@ -9,70 +9,18 @@ import logging
 
 logger = logging.getLogger("iterations")
 
-def greedy_construction(solution):
+def Search(solution): #Heuristics and pruning, best first search
     constr_rule = solution.construction_neighbourhood()
-    move_iter = iter(constr_rule.moves(solution))
-    move = next(move_iter, None)
-    while move is not None:
-        best_move, best_incr = move, move.lower_bound_increment(solution)
-        for move in move_iter:
-            incr = move.lower_bound_increment(solution)
-            if incr < best_incr:
-                best_move, best_incr = move, incr
-                if incr == 0:
-                    break
-        best_move.apply(solution)
-        move_iter = iter(constr_rule.moves(solution))
-        move = next(move_iter, None)
-    return solution
-
-def greedy_construction_random_tie_breaking(solution):
-    constr_rule = solution.construction_neighbourhood()
-    move_iter = iter(constr_rule.moves(solution))
-    move = next(move_iter, None)
-    while move is not None:
-        best_move, best_incr = [move], move.lower_bound_increment(solution)
-        for move in move_iter:
-            incr = move.lower_bound_increment(solution)
-            if incr == best_incr or type(incr) == float and math.isclose(best_incr, incr):
-                best_move.append(move)
-            elif incr < best_incr:
-                best_move, best_incr = [move], incr
-        random.choice(best_move).apply(solution)
-        move_iter = iter(constr_rule.moves(solution))
-        move = next(move_iter, None)
-    return solution
-
-def first_improvement(solution):
-    # modifies solution in place and returns a reference to it
-    sol_value = solution.objective_value()  
-    local_nbhood = solution.local_neighbourhood()
-    move_iter = iter(local_nbhood.random_moves_without_replacement(solution))
-    move = next(move_iter, None)
-    while move is not None:
-        increment = move.objective_value_increment(solution)
-        if increment < 0:
-            move.apply(solution)
-            move_iter = iter(local_nbhood.random_moves_without_replacement(solution))
-            sol_value += increment
-            logger.info(f"new sol found: {sol_value}")
-        move = next(move_iter, None)
-    return solution
-
-def best_improvement(solution):
-    # modifies solution in place and returns a reference to it
-    local_nbhood = solution.local_neighbourhood()
-    move_iter = iter(local_nbhood.moves(solution))
-    move = next(move_iter, None)
-    while move is not None:
-        best_move, best_incr = move, move.objective_value_increment(solution)
-        for move in move_iter:
-            incr = move.objective_value_increment(solution)
-            if incr < best_incr:
-                best_move, best_incr = move, incr
-        if best_incr < 0:
-            best_move.apply(solution)
-            move_iter = iter(local_nbhood.moves(solution))
-            logger.info(f"new sol found: {best_incr}")
-        move = next(move_iter, None)
-    return solution
+    moves = constr_rule.moves(solution)
+    best_solution = solution.copy()
+    best_value = best_solution.objective_value()
+    for move in moves:
+        temp_solution = solution.copy()
+        move.apply(temp_solution)
+        temp_value = temp_solution.objective_value() + 0 #replace 0 with a heuristics function
+        if temp_value > best_value:
+            best_solution, best_value = temp_solution, temp_value
+    if best_value == solution.objective_value():
+        return best_solution
+    else:
+        return Search(best_solution)
