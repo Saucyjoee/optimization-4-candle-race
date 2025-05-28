@@ -9,18 +9,30 @@ import logging
 
 logger = logging.getLogger("iterations")
 
-def Search(solution): #Heuristics and pruning, best first search
+def Search(solution): #Heuristics and pruning, depth first search
     constr_rule = solution.construction_neighbourhood()
-    moves = constr_rule.moves(solution)
+    moves = list(constr_rule.moves(solution))
+    if moves == []:
+        return solution
+    
     best_solution = solution.copy()
+    first_value = solution.objective_value()
     best_value = best_solution.objective_value()
+
+    moves = Heuristic_sort(moves, solution)
     for move in moves:
         temp_solution = solution.copy()
         move.apply(temp_solution)
-        temp_value = temp_solution.objective_value() + 0 #replace 0 with a heuristics function
+
+        if temp_solution.objective_value() == first_value:
+            continue
+
+        temp_solution = Search(temp_solution)
+
+        temp_value = temp_solution.objective_value()
         if temp_value > best_value:
             best_solution, best_value = temp_solution, temp_value
-    if best_value == solution.objective_value():
-        return best_solution
-    else:
-        return Search(best_solution)
+    return best_solution
+
+def Heuristic_sort(moves, solution):
+    return moves
