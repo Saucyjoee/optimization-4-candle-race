@@ -21,10 +21,10 @@ if __name__ == '__main__':
             prob = Problem.from_textio(f)
         #prob = tsp.Problem.from_textio(sys.stdin)
     else:
-        #prob = Problem.from_textio("data/sample.txt")
+        prob = Problem.from_textio("data/sample.txt")
         pass
     if (prob):
-        sol2 = solvers.Search(Solution.empty_solution(prob))
+        sol2 = solvers.Best_first(Solution.empty_solution(prob))
         print("Heuristics search with pruning: {:.2f}".format(sol2.objective_value()))
         print(sol2)
         print(Solution(prob, [0,1,3,2,4],[]).objective_value())

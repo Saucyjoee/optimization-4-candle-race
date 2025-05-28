@@ -10,7 +10,7 @@ import logging
 logger = logging.getLogger("iterations")
 
 timer = 0
-maxtimer = 60000
+maxtimer = 10000
 def Search(solution): #Heuristics and pruning, depth first search
     global timer
     if solution.sequence == [0]:
@@ -44,3 +44,44 @@ def Search(solution): #Heuristics and pruning, depth first search
 
 def Heuristic_sort(moves, solution):
     return moves
+
+
+def Best_first(solution):
+    global timer
+    timer = 0
+    solutions = [solution]
+    Best_value = solution.objective_value()
+    Best_solution = solution
+    while solutions != [] and timer < maxtimer:
+        if Best_value < solutions[-1].objective_value():
+            Best_solution = solutions[-1]
+            Best_value = solutions[-1].objective_value()
+        sol = solutions[-1]
+        solutions.pop()
+        constr_rule = sol.construction_neighbourhood()
+        moves = list(constr_rule.moves(sol))
+        for move in moves:
+            temp_sol = sol.copy()
+            move.apply(temp_sol)
+            i = binary_search([x.objective_value() for x in solutions], temp_sol.objective_value(), 0, len(solutions) - 1)
+            solutions.insert(i, temp_sol)
+    return Best_solution
+        
+
+def binary_search(arr, val, start, end):
+    if start == end:
+        if arr[start] > val:
+            return start
+        else:
+            return start+1
+        
+    if start > end:
+        return start
+
+    mid = int((start+end)/2)
+    if arr[mid] < val:
+        return binary_search(arr, val, mid+1, end)
+    elif arr[mid] > val:
+        return binary_search(arr, val, start, mid-1)
+    else:
+        return mid
