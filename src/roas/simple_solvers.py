@@ -9,7 +9,12 @@ import logging
 
 logger = logging.getLogger("iterations")
 
+timer = 0
+maxtimer = 60000
 def Search(solution): #Heuristics and pruning, depth first search
+    global timer
+    if solution.sequence == [0]:
+        timer = 0
     constr_rule = solution.construction_neighbourhood()
     moves = list(constr_rule.moves(solution))
     if moves == []:
@@ -21,6 +26,8 @@ def Search(solution): #Heuristics and pruning, depth first search
 
     moves = Heuristic_sort(moves, solution)
     for move in moves:
+        if timer > maxtimer:
+            continue
         temp_solution = solution.copy()
         move.apply(temp_solution)
 
@@ -32,6 +39,7 @@ def Search(solution): #Heuristics and pruning, depth first search
         temp_value = temp_solution.objective_value()
         if temp_value > best_value:
             best_solution, best_value = temp_solution, temp_value
+    timer += 1
     return best_solution
 
 def Heuristic_sort(moves, solution):
