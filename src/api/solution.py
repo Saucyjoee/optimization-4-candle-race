@@ -17,7 +17,6 @@ class Solution:
         self.not_scheduled = not_scheduled
         self.value = value
         self.time = 0
-        self.lb = 0
 
     
 
@@ -71,8 +70,22 @@ class Solution:
             prev_town = town
         return self.value
 
-    def lower_bound(self):
-        return self.lb
+    def upper_bound(self):
+        last_town = self.sequence[-1]
+        current_value = self.objective_value()
+        current_time = self.time
+
+        upper_potential = 0
+        for x in self.not_scheduled:
+            pos = self.problem.towns[x][1:3]
+            candle_length = self.problem.towns[x][3]
+            burn_rate = self.problem.towns[x][4]
+
+            dist = abs(self.problem.towns[last_town][1] - pos[0]) + abs(self.problem.towns[last_town][2] - pos[1])
+            potential_value = max(0, candle_length - burn_rate * (current_time + dist))
+            upper_potential += potential_value
+
+        return current_value + upper_potential
 
     def construction_neighbourhood(self):
         if self.c_nbhood is None:
