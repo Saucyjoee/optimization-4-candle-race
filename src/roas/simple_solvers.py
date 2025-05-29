@@ -9,12 +9,11 @@ import logging
 
 logger = logging.getLogger("iterations")
 
-timer = 0
-maxtimer = 10000
+maxtimer = 60
 def Search(solution): #Heuristics and pruning, depth first search
-    global timer
+    global start
     if solution.sequence == [0]:
-        timer = 0
+        start = time.time()
     constr_rule = solution.construction_neighbourhood()
     moves = list(constr_rule.moves(solution))
     if moves == []:
@@ -26,8 +25,6 @@ def Search(solution): #Heuristics and pruning, depth first search
 
     moves = Heuristic_sort(moves, solution)
     for move in moves:
-        if timer > maxtimer:
-            continue
         temp_solution = solution.copy()
         move.apply(temp_solution)
 
@@ -39,20 +36,26 @@ def Search(solution): #Heuristics and pruning, depth first search
         temp_value = temp_solution.objective_value()
         if temp_value > best_value:
             best_solution, best_value = temp_solution, temp_value
-    timer += 1
+        if time.time() - start >= maxtimer:
+            break
     return best_solution
 
 def Heuristic_sort(moves, solution):
     return moves
 
-
+time_spent = 0
 def Best_first(solution):
-    global timer
-    timer = 0
+    global time_spent
+    start = time.time()
+
     solutions = [solution]
     Best_value = solution.objective_value()
     Best_solution = solution
-    while solutions != [] and timer < maxtimer:
+
+    subSolutions = set()
+    subValues = dict()
+    hits = 0
+    while solutions != [] and time.time() - start < maxtimer:
         if Best_value < solutions[-1].objective_value():
             Best_solution = solutions[-1]
             Best_value = solutions[-1].objective_value()
@@ -63,8 +66,31 @@ def Best_first(solution):
         for move in moves:
             temp_sol = sol.copy()
             move.apply(temp_sol)
+
+            if temp_sol.objective_value() == sol.objective_value():
+                continue
+            
+            spent_start = time.time_ns()
+            shouldPrune  = False
+            past = temp_sol.copy()
+            for i in range(len(temp_sol.sequence)-1):
+                subSol = (past.sequence[0], frozenset(past.sequence), past.sequence[-1])
+                subSolutions.add(subSol)
+                past.time = -1
+                if subValues.get(subSol, -1) >= past.objective_value():
+                    shouldPrune  = True
+                    break
+                subValues[subSol] = past.objective_value()
+                past.sequence = past.sequence[1:]
+            if shouldPrune :
+                hits += 1
+                continue
+            time_spent += time.time_ns() - spent_start
             i = binary_search([x.objective_value() for x in solutions], temp_sol.objective_value(), 0, len(solutions) - 1)
             solutions.insert(i, temp_sol)
+    print(hits)
+    print(time_spent)
+    print(time.time() - start)
     return Best_solution
         
 

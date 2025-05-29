@@ -38,8 +38,13 @@ class AddMove(Move):
         # Tighter, but *not* better!
         # solution.lb += prob.dist[self.j][solution.tour[0]] - prob.dist[self.i][solution.tour[0]]
         # Update solution
+        pos = prob.towns[solution.sequence[-1]][1:3]
         solution.sequence.append(self.town)
         solution.not_scheduled.remove(self.town)
+
+        DT = abs(pos[0] - prob.towns[solution.sequence[-1]][1:3][0]) + abs(pos[1] - prob.towns[solution.sequence[-1]][1:3][1])
+        solution.time += DT
+        solution.value = max(0, prob.towns[solution.sequence[-1]][3] - (DT*prob.towns[solution.sequence[-1]][4]))
 
     def lower_bound_increment(self, solution):
         return solution.objective_value()
