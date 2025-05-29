@@ -60,9 +60,10 @@ class Solution:
         return True
 
     def objective_value(self):
+        
+        prev_town = self.sequence[0]
         self.time = 0
         self.value = 0
-        prev_town = self.sequence[0]
         for town in self.sequence:
             DT = abs(self.problem.towns[prev_town][1] - self.problem.towns[town][1]) + abs(self.problem.towns[prev_town][2] - self.problem.towns[town][2])
             self.time += DT
