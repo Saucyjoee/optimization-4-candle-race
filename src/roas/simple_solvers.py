@@ -48,6 +48,8 @@ def Best_first(solution):
     global time_spent
     start = time.time()
 
+    prob = solution.problem
+
     solutions = [solution]
     Best_value = solution.objective_value()
     Best_solution = solution
@@ -63,14 +65,46 @@ def Best_first(solution):
         solutions.pop()
         constr_rule = sol.construction_neighbourhood()
         moves = list(constr_rule.moves(sol))
+        
+        cache = dict()
+        spent_start = time.time_ns()
+        
+        if not (sol.sequence[-1] in cache.keys()):
+            prunable = set()
+            for move in moves:
+                temp1 = sol.copy()
+                move.apply(temp1)       # temp1 ends at C
+                for move2 in moves:
+                    if move is move2:
+                        continue
+                    # if B lies between A and C, and going A->C is an improvement
+                    if between(
+                            prob.towns[sol.sequence[-1]],
+                            prob.towns[move2.town],    # B
+                            prob.towns[move.town]     # C
+                        ) \
+                    and temp1.objective_value() > sol.objective_value():
+                        hits += 1
+                        prunable.add(move)  # mark the C‐move for removal
+            
+            cache[sol.sequence[-1]] = set(moves) - prunable
+
+        # now filter them out
+        moves = cache[sol.sequence[-1]]
+        time_spent += time.time_ns() - spent_start
+
         for move in moves:
             temp_sol = sol.copy()
             move.apply(temp_sol)
 
-            if temp_sol.objective_value() == sol.objective_value():
+            temp_val = temp_sol.objective_value()
+            sol_val = sol.objective_value()
+            best_val = Best_solution.objective_value()
+
+            if temp_val == sol_val or temp_sol.upper_bound() < best_val:
                 continue
             
-            spent_start = time.time_ns()
+            
             shouldPrune  = False
             past = temp_sol.copy()
             for i in range(len(temp_sol.sequence)-1):
@@ -83,11 +117,13 @@ def Best_first(solution):
                 subValues[subSol] = past.objective_value()
                 past.sequence = past.sequence[1:]
             if shouldPrune :
-                hits += 1
+                #hits += 1
                 continue
-            time_spent += time.time_ns() - spent_start
+            
+            
             i = binary_search([x.objective_value() for x in solutions], temp_sol.objective_value(), 0, len(solutions) - 1)
             solutions.insert(i, temp_sol)
+            
     print(hits)
     print(time_spent)
     print(time.time() - start)
@@ -111,3 +147,7 @@ def binary_search(arr, val, start, end):
         return binary_search(arr, val, start, mid-1)
     else:
         return mid
+
+def between(town1,town2,town3):
+    return ((min(town1[1], town3[1]) < town2[1] and town2[1] < max(town1[1], town3[1])) and
+             (min(town1[2], town3[2]) < town2[2] and town2[2] < max(town1[2], town3[2])))

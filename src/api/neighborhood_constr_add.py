@@ -33,8 +33,6 @@ class AddMove(Move):
     def apply(self, solution):
         #assert solution.tour[-1] == self.i
         prob = solution.problem
-        # Update lower bound
-        solution.lb += 0
         # Tighter, but *not* better!
         # solution.lb += prob.dist[self.j][solution.tour[0]] - prob.dist[self.i][solution.tour[0]]
         # Update solution
