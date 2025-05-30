@@ -104,6 +104,8 @@ def Best_first(solution): #pruning, Best first search
             
             
             spent_start = time.time_ns()
+
+            #Principle of optimality pruning
             shouldPrune  = False
             past = temp_sol.copy()
             for i in range(len(temp_sol.sequence)-1):
@@ -117,6 +119,8 @@ def Best_first(solution): #pruning, Best first search
             if shouldPrune :
                 continue
             time_spent += time.time_ns() - spent_start
+
+            
             uid += 1
             heapq.heappush(solutions, (-temp_sol.objective_value(), uid ,temp_sol))
     print(time.time() - start)
