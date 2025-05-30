@@ -11,7 +11,7 @@ if __name__ == '__main__':
             prob = Problem.from_textio(f)
     if (prob):
         sol2 = solvers.Best_first(Solution.empty_solution(prob))
-        print("Heuristics search with pruning: {:.2f}".format(sol2.objective_value()))
+        print("Best first search with pruning: {:.2f}".format(sol2.objective_value()))
         print(sol2)
         print(Solution(prob, [0,1,3,2,4],[]).objective_value())
         temp = sys.argv[1]

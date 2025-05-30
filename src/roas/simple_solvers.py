@@ -69,17 +69,17 @@ def Best_first(solution): #pruning, Best first search
         
         cache = dict()
         
+        #Towns on path pruning, with caching for improved performance
         if not (sol.sequence[-1] in cache.keys()):
             prunable = set()
             for move in moves:
                 temp1 = sol.copy()
-                move.apply(temp1)       # temp1 ends at C
+                move.apply(temp1)
                 if temp1.objective_value() <= score:
                     continue
                 for move2 in moves:
                     if move is move2:
                         continue
-                    # if B lies between A and C, and going A->C is an improvement
                     if between(
                             prob.towns[sol.sequence[-1]],
                             prob.towns[move2.town],    # B
@@ -88,8 +88,6 @@ def Best_first(solution): #pruning, Best first search
                         prunable.add(move)  # mark the C‐move for removal
             
             cache[sol.sequence[-1]] = set(moves) - prunable
-
-        # now filter them out
         moves = cache[sol.sequence[-1]]
         
         
@@ -100,6 +98,7 @@ def Best_first(solution): #pruning, Best first search
             temp_val = temp_sol.objective_value()
             best_val = Best_solution.objective_value()
 
+            #simple pruning
             if temp_val == score or temp_sol.upper_bound() < best_val:
                 continue
             
@@ -120,7 +119,7 @@ def Best_first(solution): #pruning, Best first search
             time_spent += time.time_ns() - spent_start
             uid += 1
             heapq.heappush(solutions, (-temp_sol.objective_value(), uid ,temp_sol))
-            
+    print(time.time() - start)
     return Best_solution
         
 
