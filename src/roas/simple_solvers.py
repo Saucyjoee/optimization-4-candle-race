@@ -4,7 +4,7 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-import random, operator, time, math
+import random, operator, time, math, heapq
 import logging
 
 logger = logging.getLogger("iterations")
@@ -50,30 +50,35 @@ def Best_first(solution):
 
     prob = solution.problem
 
-    solutions = [solution]
+    #solutions = [solution]
+    solutions = []
     Best_value = solution.objective_value()
     Best_solution = solution
+    uid = 0
+    heapq.heappush(solutions, (-Best_value, uid, solution))
 
     subSolutions = set()
     subValues = dict()
     hits = 0
     while solutions != [] and time.time() - start < maxtimer:
-        if Best_value < solutions[-1].objective_value():
-            Best_solution = solutions[-1]
-            Best_value = solutions[-1].objective_value()
-        sol = solutions[-1]
-        solutions.pop()
+        neg_score, _, sol = heapq.heappop(solutions)
+        score = -neg_score
+        #hits += 1
+        if Best_value < score:
+            Best_solution = sol
+            Best_value = score
         constr_rule = sol.construction_neighbourhood()
         moves = list(constr_rule.moves(sol))
         
         cache = dict()
-        spent_start = time.time_ns()
         
         if not (sol.sequence[-1] in cache.keys()):
             prunable = set()
             for move in moves:
                 temp1 = sol.copy()
                 move.apply(temp1)       # temp1 ends at C
+                if temp1.objective_value() <= score:
+                    continue
                 for move2 in moves:
                     if move is move2:
                         continue
@@ -82,34 +87,32 @@ def Best_first(solution):
                             prob.towns[sol.sequence[-1]],
                             prob.towns[move2.town],    # B
                             prob.towns[move.town]     # C
-                        ) \
-                    and temp1.objective_value() > sol.objective_value():
-                        hits += 1
+                        ):
+                        #hits += 1
                         prunable.add(move)  # mark the C‐move for removal
             
             cache[sol.sequence[-1]] = set(moves) - prunable
 
         # now filter them out
         moves = cache[sol.sequence[-1]]
-        time_spent += time.time_ns() - spent_start
-
+        
+        
         for move in moves:
             temp_sol = sol.copy()
             move.apply(temp_sol)
 
             temp_val = temp_sol.objective_value()
-            sol_val = sol.objective_value()
             best_val = Best_solution.objective_value()
 
-            if temp_val == sol_val or temp_sol.upper_bound() < best_val:
+            if temp_val == score or temp_sol.upper_bound() < best_val:
                 continue
             
             
+            spent_start = time.time_ns()
             shouldPrune  = False
             past = temp_sol.copy()
             for i in range(len(temp_sol.sequence)-1):
                 subSol = (past.sequence[0], frozenset(past.sequence), past.sequence[-1])
-                subSolutions.add(subSol)
                 past.time = -1
                 if subValues.get(subSol, -1) >= past.objective_value():
                     shouldPrune  = True
@@ -117,13 +120,18 @@ def Best_first(solution):
                 subValues[subSol] = past.objective_value()
                 past.sequence = past.sequence[1:]
             if shouldPrune :
-                #hits += 1
+                hits += 1
                 continue
+            #hits += 1
+            time_spent += time.time_ns() - spent_start
+            uid += 1
+            heapq.heappush(solutions, (-temp_sol.objective_value(), uid ,temp_sol))
+            
+            #i = binary_search([x.objective_value() for x in solutions], temp_sol.objective_value(), 0, len(solutions) - 1)
+            #solutions.insert(i, temp_sol)
             
             
-            i = binary_search([x.objective_value() for x in solutions], temp_sol.objective_value(), 0, len(solutions) - 1)
-            solutions.insert(i, temp_sol)
-            
+        
     print(hits)
     print(time_spent)
     print(time.time() - start)
