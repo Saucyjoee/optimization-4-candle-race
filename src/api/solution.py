@@ -24,7 +24,7 @@ class Solution:
         self.l_nbhood = None
 
     def __str__(self):
-        return " ".join(map(str, self.sequence))
+        return "\n".join(map(str, self.sequence))
 
     def copy(self):
         return self.__class__(self.problem,

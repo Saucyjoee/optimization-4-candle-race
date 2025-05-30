@@ -1,8 +1,4 @@
-#!/usr/bin/env python3
-#
-# SPDX-FileCopyrightText: 2025 Carlos M. Fonseca <cmfonsec@dei.uc.pt>
-#
-# SPDX-License-Identifier: Apache-2.0
+
 
 
 from api.base import Neighbourhood, Move
@@ -13,7 +9,6 @@ from api.base import Neighbourhood, Move
 class AddNeighbourhood(Neighbourhood):
     def moves(self, solution):
         assert self.problem == solution.problem
-        #dd = [(job,self.problem.due_dates[job]) for job in solution.not_scheduled]
         for town in solution.not_scheduled:
             yield AddMove(self, town)
 
@@ -30,11 +25,7 @@ class AddMove(Move):
         return "%d" % self.town
 
     def apply(self, solution):
-        #assert solution.tour[-1] == self.i
         prob = solution.problem
-        # Tighter, but *not* better!
-        # solution.lb += prob.dist[self.j][solution.tour[0]] - prob.dist[self.i][solution.tour[0]]
-        # Update solution
 
         if self.town in solution.not_scheduled and not self.town in solution.sequence:
             pos = prob.towns[solution.sequence[-1]][1:3]
