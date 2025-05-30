@@ -9,8 +9,8 @@ import logging
 
 logger = logging.getLogger("iterations")
 
-maxtimer = 60
-def Search(solution): #Heuristics and pruning, depth first search
+maxtimer = 50
+def Search(solution): #pruning, depth first search
     global start
     if solution.sequence == [0]:
         start = time.time()
@@ -44,26 +44,23 @@ def Heuristic_sort(moves, solution):
     return moves
 
 time_spent = 0
-def Best_first(solution):
+def Best_first(solution): #pruning, Best first search
     global time_spent
     start = time.time()
 
     prob = solution.problem
 
-    #solutions = [solution]
     solutions = []
     Best_value = solution.objective_value()
     Best_solution = solution
     uid = 0
     heapq.heappush(solutions, (-Best_value, uid, solution))
 
-    subSolutions = set()
+
     subValues = dict()
-    hits = 0
     while solutions != [] and time.time() - start < maxtimer:
         neg_score, _, sol = heapq.heappop(solutions)
         score = -neg_score
-        #hits += 1
         if Best_value < score:
             Best_solution = sol
             Best_value = score
@@ -88,7 +85,6 @@ def Best_first(solution):
                             prob.towns[move2.town],    # B
                             prob.towns[move.town]     # C
                         ):
-                        #hits += 1
                         prunable.add(move)  # mark the C‐move for removal
             
             cache[sol.sequence[-1]] = set(moves) - prunable
@@ -120,41 +116,14 @@ def Best_first(solution):
                 subValues[subSol] = past.objective_value()
                 past.sequence = past.sequence[1:]
             if shouldPrune :
-                hits += 1
                 continue
-            #hits += 1
             time_spent += time.time_ns() - spent_start
             uid += 1
             heapq.heappush(solutions, (-temp_sol.objective_value(), uid ,temp_sol))
             
-            #i = binary_search([x.objective_value() for x in solutions], temp_sol.objective_value(), 0, len(solutions) - 1)
-            #solutions.insert(i, temp_sol)
-            
-            
-        
-    print(hits)
-    print(time_spent)
-    print(time.time() - start)
     return Best_solution
         
 
-def binary_search(arr, val, start, end):
-    if start == end:
-        if arr[start] > val:
-            return start
-        else:
-            return start+1
-        
-    if start > end:
-        return start
-
-    mid = int((start+end)/2)
-    if arr[mid] < val:
-        return binary_search(arr, val, mid+1, end)
-    elif arr[mid] > val:
-        return binary_search(arr, val, start, mid-1)
-    else:
-        return mid
 
 def between(town1,town2,town3):
     return ((min(town1[1], town3[1]) < town2[1] and town2[1] < max(town1[1], town3[1])) and
