@@ -16,7 +16,7 @@ class Solution:
         self.sequence = sequence
         self.not_scheduled = not_scheduled
         self.value = value
-        self.time = 0
+        self.time = time
 
     
 
@@ -59,7 +59,8 @@ class Solution:
         return True
 
     def objective_value(self):
-        
+        #if self.sequence[0] == 0 and self.value != 0:
+        #    return self.value
         prev_town = self.sequence[0]
         self.time = 0
         self.value = 0
